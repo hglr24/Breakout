@@ -1,2 +1,19 @@
 Harry Ross (hgr8)
 
+Overview:
+This version of Breakout will differ from the
+
+Levels:
+Level 1 - Basic block grid
+Level 2 -
+
+Types of blocks:
+
+
+Types of power-up:
+
+
+Cheat keys:
+
+
+Extra addition:
