@@ -1,0 +1,9 @@
+Splash screen
+Instructions
+Powerups
+Paddle holds ball at start
+Fix collisions
+Enemies
+Display lives & score
+Implement score
+Cheat keys
