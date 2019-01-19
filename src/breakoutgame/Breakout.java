@@ -16,6 +16,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.application.Application;
@@ -30,7 +31,7 @@ public class Breakout extends Application {
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final Paint BACKGROUND = Color.NAVY;
-    public static final int BLOCKS_PER_COL = 4;
+    public static final int BLOCKS_PER_COL = 10;
     public static final int BLOCKS_PER_ROW = 10;
     public static final int HORIZ_OFFSET = 2;
     public static final int VERT_OFFSET = 25;
@@ -44,7 +45,7 @@ public class Breakout extends Application {
     private Paddle myPaddle;
     private ArrayList<Ball> ballList;
     private ArrayList<Block> blockList;
-    private int currLevel = 1;
+    private int currLevel = 3;
     private static int livesCount;
     private static int activeBalls;
     private boolean levelComplete;
@@ -119,22 +120,27 @@ public class Breakout extends Application {
      */
     private void updateBallAttributes(double elapsedTime) {
         for (Ball b : ballList) {
-            b.setLastX(b.getX());
-            b.setLastY(b.getY());
-            b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
-            b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
-
-            if (b.getX() + b.getBoundsInParent().getWidth() >= SIZE || b.getX() <= 0) {
-                b.reverseX();
+            if (!b.isLaunched()) {
+                b.attachToPaddle(myPaddle);
             }
+            else {
+                b.setLastX(b.getX());
+                b.setLastY(b.getY());
+                b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
+                b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
 
-            if (b.getY() <= 0) {
-                b.reverseY();
-            }
+                if (b.getX() + b.getBoundsInParent().getWidth() >= SIZE || b.getX() <= 0) {
+                    b.reverseX();
+                }
 
-            if (b.getY() >= SIZE) {
-                activeBalls--;
-                resetBall(b);
+                if (b.getY() <= 0) {
+                    b.reverseY();
+                }
+
+                if (b.getY() >= SIZE) {
+                    activeBalls--;
+                    resetBall(b);
+                }
             }
         }
     }
@@ -147,32 +153,32 @@ public class Breakout extends Application {
 
         for (Ball b : ballList) {
             if (myPaddle.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                b.reverseY();
+                rectangleCollision(myPaddle, b);
             }
-
             for (Block blo : blockList) {
                 if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                    if (b.getLastY() + b.getBoundsInParent().getHeight() < blo.getY()) { //must be above brick
-                        b.reverseY();
-                    }
-                    else if (b.getLastY() > blo.getY() + blo.getBoundsInParent().getHeight()) { //must be below
-                        b.reverseY();
-                    }
-                    else { //must be left or right
-                        b.reverseX();
-                    }
-
-                    b.revert();
+                    rectangleCollision(blo, b);
                     blo.updateHealth();
                 }
                 if (blo.getHealth() > 0 && !blo.isRemoved()) {
                     levelComplete = false;
                 }
             }
-            if (levelComplete) {
-                nextLevel();
-            }
+            if (levelComplete) nextLevel();
         }
+    }
+
+    private void rectangleCollision(Rectangle r, Ball b) {
+        if (b.getLastY() + b.getBoundsInParent().getHeight() < r.getY()) { //must be above brick
+            b.reverseY();
+        }
+        else if (b.getLastY() > r.getY() + r.getBoundsInParent().getHeight()) { //must be below
+            b.reverseY();
+        }
+        else { //must be left or right
+            b.reverseX();
+        }
+        b.revert();
     }
 
     /**
@@ -182,7 +188,7 @@ public class Breakout extends Application {
      */
     private void drawNewBall(int horiz, int vert) {
         Ball newBall = new Ball(horiz, vert);
-        newBall.initialize();
+        newBall.initialize(myPaddle);
         ballList.add(newBall);
         root.getChildren().add(newBall);
         activeBalls++;
@@ -216,7 +222,7 @@ public class Breakout extends Application {
     private void resetBall(Ball b) {
         if (livesCount > 0 && activeBalls == 0){
             livesCount--;
-            b.initialize();
+            b.initialize(myPaddle);
             activeBalls++;
         }
         else if (livesCount == 0){
@@ -280,7 +286,12 @@ public class Breakout extends Application {
      * @param code
      */
     private void handleKeyInput (KeyCode code) {
-        if (code == KeyCode.RIGHT) {
+        if (code == KeyCode.SPACE) {
+            for (Ball b : ballList) {
+                if (!b.isLaunched()) {
+                    b.launch();
+                }
+            }
         }
     }
 

@@ -8,30 +8,40 @@ public class Ball extends ImageView {
 
     private int myWidth;
     private int myHeight;
-    private int myXSpeed;
-    private int myYSpeed;
+    private int myXSpeed = 0;
+    private int myYSpeed = 0;
     private int myXDirection;
     private int myYDirection;
     private int mySpeedRange = 40;
     private int myMinSpeed = 150;
     private double myLastY;
     private double myLastX;
+    private boolean myLaunchStatus;
     private static final String BALL_IMAGE = "ball.gif";
 
-    public Ball(int w, int h){
+    public Ball(int w, int h) {
         super();
         myWidth = w;
         myHeight = h;
     }
 
-    public void initialize(){
+    public void initialize(Paddle p) {
         this.setImage(new Image(this.getClass().getClassLoader().getResourceAsStream(BALL_IMAGE)));
-        this.setX(myWidth / 2.0 - this.getBoundsInLocal().getWidth() / 2);
-        this.setY(myHeight / 2.0 - this.getBoundsInLocal().getHeight() / 2);
-        myXSpeed = (int) ((Math.random() * mySpeedRange) + myMinSpeed) * randomDirection();
-        myYSpeed = (int) (Math.random() * mySpeedRange) + myMinSpeed;
+        this.attachToPaddle(p);
         myXDirection = 1;
         myYDirection = 1;
+        myLaunchStatus = false;
+    }
+
+    public void attachToPaddle(Paddle p) {
+        this.setX(p.getX() + p.getBoundsInParent().getWidth() / 2 - this.getBoundsInParent().getWidth() / 2);
+        this.setY(p.getY() - this.getBoundsInParent().getHeight() - 1);
+    }
+
+    public void launch() {
+        myLaunchStatus = true;
+        myXSpeed = (int) ((Math.random() * mySpeedRange) + myMinSpeed) * randomDirection();
+        myYSpeed = (int) (Math.random() * mySpeedRange) + myMinSpeed * -1;
     }
 
     private int randomDirection() {
@@ -77,6 +87,10 @@ public class Ball extends ImageView {
 
     public int getYDirection(){
         return myYDirection;
+    }
+
+    public boolean isLaunched() {
+        return myLaunchStatus;
     }
 
     public void reverseX(){

@@ -1,13 +1,15 @@
 Splash screen
 Instructions
-Paddle holds ball at start
-Fix paddle collisions
 Enemies
 Display lives & score
 Implement score
-Cheat keys
 Readmes
-More blocks to make levels harder
+shrink methods
+
+Cheat keys:
+Key 1: Extra life - Press F11 at any time
+Key 2, 3, 4: Level select - press F1, F2, F3 at any time
+             (F1 -> Lvl 1, F2 -> Lvl 2, F3 -> Lvl 3)
 
 Power-ups:
 Multiball
