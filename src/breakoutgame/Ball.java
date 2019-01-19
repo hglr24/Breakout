@@ -13,7 +13,9 @@ public class Ball extends ImageView {
     private int myXDirection;
     private int myYDirection;
     private int mySpeedRange = 40;
-    private int myMinSpeed = 80;
+    private int myMinSpeed = 150;
+    private double myLastY;
+    private double myLastX;
     private static final String BALL_IMAGE = "ball.gif";
 
     public Ball(int w, int h){
@@ -38,6 +40,27 @@ public class Ball extends ImageView {
 
     public void flushBall(Group root) {
         root.getChildren().remove(this);
+    }
+
+    public void revert() {
+        this.setX(myLastX);
+        this.setY(myLastY);
+    }
+
+    public void setLastY(double y) {
+        myLastY = y;
+    }
+
+    public double getLastY() {
+        return myLastY;
+    }
+
+    public void setLastX(double x) {
+        myLastX = x;
+    }
+
+    public double getLastX() {
+        return myLastX;
     }
 
     public int getXSpeed(){

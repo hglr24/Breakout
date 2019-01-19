@@ -44,7 +44,7 @@ public class Breakout extends Application {
     private Paddle myPaddle;
     private ArrayList<Ball> ballList;
     private ArrayList<Block> blockList;
-    private int currLevel = 2;
+    private int currLevel = 1;
     private static int livesCount;
     private static int activeBalls;
     private boolean levelComplete;
@@ -119,10 +119,12 @@ public class Breakout extends Application {
      */
     private void updateBallAttributes(double elapsedTime) {
         for (Ball b : ballList) {
+            b.setLastX(b.getX());
+            b.setLastY(b.getY());
             b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
             b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
 
-            if (b.getX() >= SIZE || b.getX() <= 0) {
+            if (b.getX() + b.getBoundsInParent().getWidth() >= SIZE || b.getX() <= 0) {
                 b.reverseX();
             }
 
@@ -150,15 +152,24 @@ public class Breakout extends Application {
 
             for (Block blo : blockList) {
                 if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                    //TODO: Fix collisions
-                    b.reverseY();
+                    if (b.getLastY() + b.getBoundsInParent().getHeight() < blo.getY()) { //must be above brick
+                        b.reverseY();
+                    }
+                    else if (b.getLastY() > blo.getY() + blo.getBoundsInParent().getHeight()) { //must be below
+                        b.reverseY();
+                    }
+                    else { //must be left or right
+                        b.reverseX();
+                    }
+
+                    b.revert();
                     blo.updateHealth();
                 }
                 if (blo.getHealth() > 0 && !blo.isRemoved()) {
                     levelComplete = false;
                 }
             }
-            if(levelComplete) {
+            if (levelComplete) {
                 nextLevel();
             }
         }
@@ -203,11 +214,10 @@ public class Breakout extends Application {
      * @param b
      */
     private void resetBall(Ball b) {
-        if(livesCount > 0 && activeBalls == 0){
+        if (livesCount > 0 && activeBalls == 0){
             livesCount--;
             b.initialize();
             activeBalls++;
-            //pause for 2 seconds //TODO pause
         }
         else if (livesCount == 0){
             gameEnd("Game Over");
@@ -218,7 +228,7 @@ public class Breakout extends Application {
      *
      */
     private void nextLevel() {
-        if(currLevel <= 2) {
+        if (currLevel <= 2) {
             currLevel++;
 
             flushObjects();
