@@ -41,18 +41,14 @@ public class Paddle extends Rectangle {
      * Lengthens paddle to twice original size
      */
     public void lengthen() {
-        if (this.getWidth() == myWidth) {
-            this.setWidth(2 * myWidth);
-        }
+        this.setWidth(PADDLE_ORIG_WIDTH * 2);
     }
 
     /**
      * Shrinks paddle by half
      */
     public void shrink() {
-        if (this.getWidth() > myWidth) {
-            this.setWidth(myWidth / 2.0);
-        }
+        this.setWidth(PADDLE_ORIG_WIDTH / 2.0);
     }
 
     /**

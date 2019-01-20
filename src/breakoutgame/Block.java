@@ -17,7 +17,7 @@ public class Block extends Rectangle {
     private static final int BLOCK_WIDTH = 56;
     private static final int BLOCK_HEIGHT = 23;
     private boolean removed = false;
-    private static final int offscreen = -100;
+    private static final int OFFSCREEN = -100;
 
     /**
      * Creates block with given parameters
@@ -72,7 +72,7 @@ public class Block extends Rectangle {
     }
 
     private void remove(){
-        this.setX(offscreen);
+        this.setX(OFFSCREEN);
         this.removed = true;
     }
 

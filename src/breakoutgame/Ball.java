@@ -16,7 +16,9 @@ public class Ball extends ImageView {
     private double myLastY;
     private double myLastX;
     private boolean myLaunchStatus;
+    private boolean myRemoved;
     private static final String BALL_IMAGE = "ball.gif";
+    private static final int OFFSCREEN = -100;
 
     /**
      * Creates ball object
@@ -34,6 +36,8 @@ public class Ball extends ImageView {
         this.attachToPaddle(p);
         myXDirection = 1;
         myYDirection = 1;
+        myXSpeed = 0;
+        myYSpeed = 0;
         myLaunchStatus = false;
     }
 
@@ -71,6 +75,16 @@ public class Ball extends ImageView {
     public void revert() {
         this.setX(myLastX);
         this.setY(myLastY);
+    }
+
+    /**
+     * Removes ball from play area
+     */
+    public void remove() {
+        this.setX(OFFSCREEN);
+        myXSpeed = 0;
+        myYSpeed = 0;
+        myRemoved = true;
     }
 
     /**
@@ -157,5 +171,13 @@ public class Ball extends ImageView {
      */
     public boolean isLaunched() {
         return myLaunchStatus;
+    }
+
+    /**
+     * Returns whether or not ball has been removed from play
+     * @return Removal status
+     */
+    public boolean isRemoved() {
+        return myRemoved;
     }
 }

@@ -54,10 +54,11 @@ public class Breakout extends Application {
     private boolean gameOver;
     private Text scoreText;
     private Text livesText;
+    private Text levelText;
     private double sceneDim;
 
     /**
-     *  Starts the JavaFX application
+     * Starts the JavaFX application
      * @param stage Game stage
      */
     @Override
@@ -101,8 +102,10 @@ public class Breakout extends Application {
 
         scoreText = new Text(); // Create score and lives text
         livesText = new Text();
+        levelText = new Text();
         root.getChildren().add(scoreText);
         root.getChildren().add(livesText);
+        root.getChildren().add(levelText);
     }
 
     private void step (double elapsedTime) {
@@ -119,11 +122,12 @@ public class Breakout extends Application {
 
     private void updateBallAttributes(double elapsedTime) {
         for (Ball b : ballList) {
-            if (!b.isLaunched()) {
-                b.attachToPaddle(myPaddle);
-            }
-            else {
-                moveBall(b, elapsedTime);
+            if (!b.isRemoved()) {
+                if (!b.isLaunched()) {
+                    b.attachToPaddle(myPaddle);
+                } else {
+                    moveBall(b, elapsedTime);
+                }
             }
         }
     }
@@ -133,24 +137,26 @@ public class Breakout extends Application {
         b.setLastY(b.getY());
         b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
         b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
-
         if (b.getX() + b.getBoundsInParent().getWidth() >= SIZE || b.getX() <= 0) {
             b.reverseX();
         }
-
         if (b.getY() <= 0) {
             b.reverseY();
         }
-
         if (b.getY() >= SIZE) {
             activeBalls--;
-            resetBall(b);
+            if (activeBalls > 0) {
+                b.flushBall(root);
+                b.remove();
+            }
+            else {
+                resetBall(b);
+            }
         }
     }
 
     private void checkForCollisions() {
         boolean levelComplete = true;
-
         for (Ball b : ballList) {
             if (myPaddle.getBoundsInParent().intersects(b.getBoundsInParent())) {
                 rectangleCollision(myPaddle, b);
@@ -173,8 +179,15 @@ public class Breakout extends Application {
     }
 
     private void rectangleCollision(Rectangle r, Ball b) {
+        boolean paddleFree = true;
         if (b.getLastY() + b.getBoundsInParent().getHeight() < r.getY()) { //must be above brick
             b.reverseY();
+            if (r instanceof Paddle && ((Paddle) r).isSticky()) {
+                for (Ball ball : ballList) {
+                    if (!ball.isLaunched()) paddleFree = false;
+                }
+                if (paddleFree) b.initialize((Paddle) r);
+            }
         }
         else if (b.getLastY() > r.getY() + r.getBoundsInParent().getHeight()) { //must be below
             b.reverseY();
@@ -198,6 +211,10 @@ public class Breakout extends Application {
             playerScore += add;
             t.setText("" + playerScore);
             xpos = HORIZ_OFFSET;
+        }
+        if (t.equals(levelText)) {
+            t.setText("Level " + currLevel);
+            xpos = SIZE / 2.0 - t.getBoundsInParent().getWidth() / 2.0;
         }
         t.setX(xpos);
         t.setY(SIZE - VERT_OFFSET);
@@ -230,6 +247,7 @@ public class Breakout extends Application {
         for (Text t : textList) {
             root.getChildren().remove(t);
         }
+        activeBalls = 0;
         blockList = new ArrayList<>();
         ballList = new ArrayList<>();
         powerupList = new ArrayList<>();
@@ -294,13 +312,16 @@ public class Breakout extends Application {
             flushObjects();
 
             drawNewBall();
+            myPaddle.initialize();
             drawBlocks(currLevel);
             updatePlayerVar(scoreText, 0);
             updatePlayerVar(livesText, 0);
+            updatePlayerVar(levelText, 0);
         }
 
         else {
             flushObjects();
+            levelText.setVisible(false);
             drawText("You Win!", FONT_SIZE_LRG, SIZE / 2.0);
         }
     }
@@ -333,6 +354,15 @@ public class Breakout extends Application {
             }
             if (code == KeyCode.F11) {
                 updatePlayerVar(livesText, 1);
+            }
+            if (code == KeyCode.B) {
+                drawNewBall();
+            }
+            if (code == KeyCode.L) {
+                myPaddle.lengthen();
+            }
+            if (code == KeyCode.S) {
+                myPaddle.shrink();
             }
         }
     }
