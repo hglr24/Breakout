@@ -6,6 +6,7 @@ import javafx.scene.paint.Paint;
 
 /**
  * Class for paddle objects in Breakout game
+ * Depends on breakoutgame package, JavaFX library
  * @author Harry Ross (hgr8)
  */
 public class Paddle extends Rectangle {
@@ -56,6 +57,14 @@ public class Paddle extends Rectangle {
      */
     public void stickify() {
         mySticky = true;
+    }
+
+    /**
+     * "Kills" paddle when hit by enemy
+     * @param e Enemy that collided with paddle
+     */
+    public void kill(Enemy e) {
+        this.initialize();
     }
 
     /**

@@ -28,16 +28,24 @@ Data files needed:
 - 2.txt
 - 3.txt
 - ball.gif
+- pup0.gif
+- pup1.gif
+- pup2.gif
+- pup3.gif
+- en1.gif
+- en2.gif
 
 Key/Mouse inputs:
 - Use mouse cursor to move paddle
-- SPACE to launch ball
+- Use Space to launch ball
+- Press Enter to begin game
 
 Cheat keys:
 - F1 - Go to level 1
 - F2 - Go to level 2
 - F3 - Go to level 3
 - F11 - Add one life to current lives
+- B - Add one ball to play
 
 Known Bugs:
 - None
@@ -49,7 +57,9 @@ Added enemies to game to make it more interactive and lively:
 
 
 ### Notes
-
+- Included three paddle enhancements that count toward overall
+power-up requirement since specifications implied these enhancements
+are power-ups if implemented as such.
 
 ### Impressions
 - Design checklist and specification pages on CS308 website

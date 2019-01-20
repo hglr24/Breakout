@@ -4,6 +4,7 @@ import java.util.*;
 import java.awt.*;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -17,9 +18,11 @@ import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Main game class for Breakout, developed for CS308
+ * Depends on breakoutgame package, JavaFX library, java.util.*, java.awt.*
  * @author Harry Ross (hgr8)
  */
 public class Breakout extends Application {
@@ -39,6 +42,9 @@ public class Breakout extends Application {
     private static final int FONT_SIZE_SML = 30;
     private static final double DEFAULT_STROKE = 1.9;
     private static final int STARTING_LIVES = 2;
+    private static final int PUP_CHANCE = 6;
+    private static final int BLOCK_VALUE = 200;
+    private static final int LVL_COMP_VALUE = 10000;
 
     private Stage myStage;
     private Group root;
@@ -47,6 +53,7 @@ public class Breakout extends Application {
     private ArrayList<Block> blockList;
     private ArrayList<Text> textList;
     private ArrayList<Powerup> powerupList;
+    private ArrayList<Enemy> enemyList;
     private int currLevel;
     private int playerScore;
     private int livesCount;
@@ -95,6 +102,7 @@ public class Breakout extends Application {
         blockList = new ArrayList<>();
         powerupList = new ArrayList<>();
         textList = new ArrayList<>();
+        enemyList = new ArrayList<>();
 
         currLevel = 0;
         livesCount = STARTING_LIVES;
@@ -112,7 +120,9 @@ public class Breakout extends Application {
         maintainSceneDims();
         handleMouseControl();
         updateBallAttributes(elapsedTime);
-        checkForCollisions();
+        updatePowerups(elapsedTime);
+        checkForBallCollisions();
+        checkForProjCollisions();
     }
 
     private void maintainSceneDims() {
@@ -129,6 +139,12 @@ public class Breakout extends Application {
                     moveBall(b, elapsedTime);
                 }
             }
+        }
+    }
+
+    private void updatePowerups(double elapsedTime) {
+        for (Powerup p : powerupList) {
+            p.move(elapsedTime);
         }
     }
 
@@ -155,30 +171,48 @@ public class Breakout extends Application {
         }
     }
 
-    private void checkForCollisions() {
+    private void checkForBallCollisions() {
         boolean levelComplete = true;
         for (Ball b : ballList) {
             if (myPaddle.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                rectangleCollision(myPaddle, b);
+                rectangleBallCollision(myPaddle, b);
             }
             for (Block blo : blockList) {
                 if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                    rectangleCollision(blo, b);
+                    rectangleBallCollision(blo, b);
+                    if (blo.getHealth() != -1 && currLevel != 0) {
+                        powerupChance(blo);
+                        updatePlayerVar(scoreText, BLOCK_VALUE);
+                    }
                     blo.updateHealth();
-                    if (blo.getHealth() != -1) updatePlayerVar(scoreText, 200);
                 }
                 if (blo.getHealth() > 0 && !blo.isRemoved()) {
                     levelComplete = false;
                 }
             }
             if (levelComplete) {
-                updatePlayerVar(scoreText, 10000);
+                updatePlayerVar(scoreText, LVL_COMP_VALUE);
                 goToLevel(currLevel + 1);
             }
         }
     }
 
-    private void rectangleCollision(Rectangle r, Ball b) {
+    private void checkForProjCollisions() {
+        for (Powerup p : powerupList) {
+            if (myPaddle.getBoundsInParent().intersects(p.getBoundsInParent())) {
+                paddleProjectileCollision(p);
+            }
+        }
+        for (Enemy e : enemyList) {
+            if (myPaddle.getBoundsInParent().intersects(e.getBoundsInParent())) {
+                paddleProjectileCollision(e);
+                myPaddle.kill(e);
+            }
+        }
+        //TODO: enemy projectile cycle
+    }
+
+    private void rectangleBallCollision(Rectangle r, Ball b) {
         boolean paddleFree = true;
         if (b.getLastY() + b.getBoundsInParent().getHeight() < r.getY()) { //must be above brick
             b.reverseY();
@@ -196,6 +230,40 @@ public class Breakout extends Application {
             b.reverseX();
         }
         b.revert();
+    }
+
+    private void paddleProjectileCollision(ImageView i) {
+        if (i instanceof Powerup) {
+            switch (((Powerup) i).getType()) {
+                case 0:
+                    myPaddle.lengthen();
+                    break;
+                case 1:
+                    myPaddle.shrink();
+                    break;
+                case 2:
+                    myPaddle.stickify();
+                    break;
+                case 3:
+                    drawNewBall();
+                    drawNewBall();
+                    break;
+            }
+            ((Powerup) i).remove();
+            ((Powerup) i).flushPowerup(root);
+        }
+        if (i instanceof Enemy) {
+            //TODO KILL PADDLE (Pause paddle and enemy, balls; revert paddle, balls, powerups)
+            updatePlayerVar(livesText, -1);
+        }
+    }
+
+    private void powerupChance(Block b) {
+        int rand = ThreadLocalRandom.current().nextInt(0, PUP_CHANCE);
+        if (rand == 0) {
+            drawNewPowerup(b.getX() + b.getBoundsInParent().getWidth() / 2.0,
+                    b.getY() + b.getBoundsInParent().getHeight() / 2.0);
+        }
     }
 
     private void updatePlayerVar(Text t, int add) {
@@ -244,6 +312,9 @@ public class Breakout extends Application {
         for (Powerup p : powerupList) {
             p.flushPowerup(root);
         }
+        for(Enemy e : enemyList) {
+            e.flushEnemy(root);
+        }
         for (Text t : textList) {
             root.getChildren().remove(t);
         }
@@ -251,9 +322,9 @@ public class Breakout extends Application {
         blockList = new ArrayList<>();
         ballList = new ArrayList<>();
         powerupList = new ArrayList<>();
+        enemyList = new ArrayList<>();
         textList = new ArrayList<>();
     }
-
 
     private void drawNewBall() {
         Ball newBall = new Ball();
@@ -284,6 +355,12 @@ public class Breakout extends Application {
         }
     }
 
+    private void drawNewPowerup(double xpos, double ypos) {
+        Powerup p = new Powerup(xpos, ypos);
+        powerupList.add(p);
+        root.getChildren().add(p);
+    }
+
     private void drawText(String message, int size, double vpos) {
         Text drawnText = new Text();
         drawnText.setText(message);
@@ -300,7 +377,8 @@ public class Breakout extends Application {
 
         if (message.equals("Breakout")) {
             drawText("1 Hit     2 Hits       Unbreakable\n\n  " +
-                            "Control paddle with mouse!\n\n         Press Enter to play!",
+                            "Control paddle with mouse!\n" +
+                            "   Press Space to launch ball!\n\n         Press Enter to play!",
                     FONT_SIZE_SML, SIZE * INSTRUCTION_TXT_POS);
         }
     }
@@ -328,42 +406,25 @@ public class Breakout extends Application {
 
     private void handleMouseControl() {
         Point currBallPos = MouseInfo.getPointerInfo().getLocation();
-        myPaddle.setX(currBallPos.x - myStage.getX() - myPaddle.getBoundsInParent().getWidth() / 2);
+        double xpos = currBallPos.x - myStage.getX() - myPaddle.getBoundsInParent().getWidth() / 2;
+        if (xpos + myPaddle.getBoundsInParent().getWidth() >= 0 && xpos < SIZE) {
+            myPaddle.setX(xpos);
+        }
     }
 
     private void handleKeyInput (KeyCode code) {
         if (code == KeyCode.SPACE) {
             for (Ball b : ballList) {
-                if (!b.isLaunched()) {
-                    b.launch();
-                }
+                if (!b.isLaunched()) b.launch();
             }
         }
-        if (code == KeyCode.ENTER && currLevel == 0) {
-            goToLevel(1);
-        }
+        if (code == KeyCode.ENTER && currLevel == 0) goToLevel(1);
         if (!gameOver) {
-            if (code == KeyCode.F1) {
-                goToLevel(1);
-            }
-            if (code == KeyCode.F2) {
-                goToLevel(2);
-            }
-            if (code == KeyCode.F3) {
-                goToLevel(3);
-            }
-            if (code == KeyCode.F11) {
-                updatePlayerVar(livesText, 1);
-            }
-            if (code == KeyCode.B) {
-                drawNewBall();
-            }
-            if (code == KeyCode.L) {
-                myPaddle.lengthen();
-            }
-            if (code == KeyCode.S) {
-                myPaddle.shrink();
-            }
+            if (code == KeyCode.F1) goToLevel(1);
+            if (code == KeyCode.F2) goToLevel(2);
+            if (code == KeyCode.F3) goToLevel(3);
+            if (code == KeyCode.F11) updatePlayerVar(livesText, 1);
+            if (code == KeyCode.B) drawNewBall();
         }
     }
 

@@ -3,9 +3,11 @@ package breakoutgame;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class for ball objects in Breakout game
+ * Depends on breakoutgame package, JavaFX library and java.util.concurrent.ThreadLocalRandom
  * @author Harry Ross (hgr8)
  */
 public class Ball extends ImageView {
@@ -45,11 +47,15 @@ public class Ball extends ImageView {
      * Launches ball in random direction from paddle
      */
     public void launch() {
-        int mySpeedRange = 40;
-        int myMinSpeed = 150;
-        myLaunchStatus = true; //TODO: fix this so it's angle-based
-        myXSpeed = (int) ((Math.random() * mySpeedRange) + myMinSpeed) * randomDirection();
-        myYSpeed = (int) (Math.random() * mySpeedRange) + myMinSpeed * -1;
+        int mySpeedRange = 60;
+        int myMinSpeed = 200;
+        int minAngle = 45;
+        int maxAngle = 75;
+        double netSpeed = ThreadLocalRandom.current().nextInt(myMinSpeed, myMinSpeed + mySpeedRange);
+        double randAngle = 2 * Math.PI / 180 * ThreadLocalRandom.current().nextInt(minAngle, maxAngle);
+        myLaunchStatus = true;
+        myXSpeed = (int) (netSpeed * Math.cos(randAngle) * randomDirection());
+        myYSpeed = (int) (netSpeed * Math.sin(randAngle) * -1);
     }
 
     /**
@@ -78,7 +84,7 @@ public class Ball extends ImageView {
     }
 
     /**
-     * Removes ball from play area
+     * Removes ball from play area (use this over flushBall to avoid ConcurrentModificationException)
      */
     public void remove() {
         this.setX(OFFSCREEN);
