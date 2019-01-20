@@ -57,9 +57,11 @@ public class Block extends Rectangle {
     }
 
     public void updateHealth() {
-        myHealth--;
-        updateColor();
-        if (myHealth == 0) this.remove();
+        if (myHealth != -1) {
+            myHealth--;
+            updateColor();
+            if (myHealth == 0) this.remove();
+        }
     }
 
     public int getHealth() {

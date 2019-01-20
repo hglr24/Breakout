@@ -11,7 +11,7 @@ public class Paddle extends Rectangle {
     private boolean mySticky;
     private static final int PADDLE_HEIGHT = 15;
     private static final int PADDLE_ORIG_WIDTH = 50;
-    public static final double PADDLE_VERT_POS = 5.0/6.0;
+    public static final double PADDLE_VERT_POS = 8.8/10;
 
     public Paddle(int horizontal, int vertical) {
         super(horizontal / 2 - PADDLE_ORIG_WIDTH / 2, vertical * PADDLE_VERT_POS, PADDLE_ORIG_WIDTH, PADDLE_HEIGHT);

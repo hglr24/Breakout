@@ -1,21 +1,18 @@
-Splash screen
-Instructions
 Enemies
-Display lives & score
-Implement score
 Readmes
 shrink methods
-
-Cheat keys:
-Key 1: Extra life - Press F11 at any time
-Key 2, 3, 4: Level select - press F1, F2, F3 at any time
-             (F1 -> Lvl 1, F2 -> Lvl 2, F3 -> Lvl 3)
+lock window props
 
 Power-ups:
 Multiball
 Sticky paddle
 Long paddle
 Another paddle power-up
+
+
+
+
+
 
 Each file should include:
 
