@@ -5,49 +5,33 @@ Long paddle
 Short paddle
 
 Enemies:
-zigzag
-projectile
+Zigzag
+Projectile
 
-shrink methods: checkforcollisions
-reorganize methods
-Readmes
-
-
+Shrink methods: checkForCollisions()
+Reorder methods
+Readme
 
 
 Each file should include:
-
-    names of all people who worked on the file
     comment each class to describe its
         purpose (why would anyone use it)
         assumptions (what situations or values might cause it to fail)
         dependencies (what other classes or packages it depends on)
         an example of how to use it
-        any other details users should know
     comment each public method (and especially abstract methods)
         purpose (why would anyone use it)
         assumptions (what situations or values might cause it to fail)
-        parameters (purpose beyond their name if necessary)
-        return value
-    inline comments should be kept to a minimum (because the code should be readable on its own)
-        comments should never simply restate the code, but always state its purpose
-        code hacks, or other non-standard code, should be factored into a separate method and commented extensively
 
 README.md
-This file is due when the project is submitted.
-
-    names of all people who worked on the project
-    date you started, date you finished, and an estimate of the number of hours worked on the project
-    each person's role in developing the project
-    any books, papers, online, or human resources that you used in developing the project
-    files used to start the project (the class(es) containing main)
-    files used to test the project and errors you expect your program to handle without crashing
-    any data or resource files required by the project (including format of non-standard files)
-    any information about using the program (i.e., command-line/applet arguments, key inputs, interesting example data files, or easter eggs)
+    estimate of the number of hours worked on the project
     any decisions, assumptions, or simplifications you made to handle vague, ambiguous, or conflicting requirements
-    any known bugs, crashes, or problems with the project's functionality
-    any extra features included in the project
     your impressions of the assignment to help improve it in the future
+
+
+
+
+
 
 DESIGN.md
 This file can be completed when the analysis is submitted and any part of it can be used within your analysis as appropriate.

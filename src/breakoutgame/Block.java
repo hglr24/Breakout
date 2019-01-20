@@ -5,9 +5,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Class for block objects in Breakout game
+ * @author Harry Ross (hgr8)
+ */
 public class Block extends Rectangle {
-
-    private int myType;
     private Paint myColor;
     private int myHealth;
     private int myRow;
@@ -17,12 +19,19 @@ public class Block extends Rectangle {
     private boolean removed = false;
     private static final int offscreen = -100;
 
+    /**
+     * Creates block with given parameters
+     * @param type Type of block (1-hit, 2-hit, unbreakable)
+     * @param hpos Horizontal position of block
+     * @param vpos Vertical position of block
+     * @param r Row coordinate of block
+     * @param c Column coordinate of block
+     */
     public Block(int type, int hpos, int vpos, int r, int c) {
         super(vpos + Breakout.VERT_OFFSET, hpos + Breakout.HORIZ_OFFSET, 0, 0);
         myRow = r;
         myCol = c;
-        myType = type;
-        this.initialize(myType);
+        this.initialize(type);
     }
 
     private void initialize(int type){
@@ -51,6 +60,9 @@ public class Block extends Rectangle {
         this.setFill(myColor);
     }
 
+    /**
+     * Update health of block when struck by ball
+     */
     public void updateHealth() {
         if (myHealth != -1) {
             myHealth--;
@@ -64,14 +76,26 @@ public class Block extends Rectangle {
         this.removed = true;
     }
 
+    /**
+     * Removes block from specified Group
+     * @param root Group to remove block from
+     */
     public void flushBlock(Group root) {
         root.getChildren().remove(this);
     }
 
+    /**
+     * Returns current health of block
+     * @return Current block health
+     */
     public int getHealth() {
         return myHealth;
     }
 
+    /**
+     * Returns whether or not a block has been removed from play
+     * @return Removal status
+     */
     public boolean isRemoved() {
         return removed;
     }

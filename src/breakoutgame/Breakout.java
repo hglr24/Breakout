@@ -1,8 +1,3 @@
-/**
- *
- * @author Harry Ross (hgr8)
- */
-
 package breakoutgame;
 
 import java.util.*;
@@ -23,6 +18,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 
+/**
+ * Main game class for Breakout, developed for CS308
+ * @author Harry Ross (hgr8)
+ */
 public class Breakout extends Application {
     private static final String TITLE = "Breakout Game (hgr8)";
     public static final int SIZE = 600;
@@ -33,7 +32,8 @@ public class Breakout extends Application {
     private static final int FRAMES_PER_SECOND = 60;
     private static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     private static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-    private static final Paint BACKGROUND = Color.NAVY;
+    private static final int SCENE_DIM_OFFSET = 14;
+    private static final Paint BACKGROUND_COLOR = Color.NAVY;
     private static final double INSTRUCTION_TXT_POS = 3.0 / 5;
     private static final int FONT_SIZE_LRG = 70;
     private static final int FONT_SIZE_SML = 30;
@@ -49,11 +49,12 @@ public class Breakout extends Application {
     private ArrayList<Powerup> powerupList;
     private int currLevel;
     private int playerScore;
-    private static int livesCount;
-    private static int activeBalls;
+    private int livesCount;
+    private int activeBalls;
     private boolean gameOver;
     private Text scoreText;
     private Text livesText;
+    private double sceneDim;
 
     /**
      *  Starts the JavaFX application
@@ -62,7 +63,7 @@ public class Breakout extends Application {
     @Override
     public void start (Stage stage) {
         myStage = stage;
-        Scene myScene = setupGame(SIZE, SIZE, BACKGROUND);
+        Scene myScene = setupGame(SIZE);
         stage.setScene(myScene);
         stage.setTitle(TITLE);
         stage.show();
@@ -74,29 +75,20 @@ public class Breakout extends Application {
         animation.play();
     }
 
-    /**
-     * Create game scene with objects at starting properties
-     * @param width Scene width
-     * @param height Scene height
-     * @param background Scene background color
-     * @return Game scene
-     */
-    private Scene setupGame (int width, int height, Paint background) {
+    private Scene setupGame (int squareDim) {
         root = new Group();
-        Scene scene = new Scene(root, width, height, background);
+        Scene scene = new Scene(root, squareDim, squareDim, BACKGROUND_COLOR);
+        sceneDim = scene.getWidth() + SCENE_DIM_OFFSET;
         initializeGameVars();
 
-        drawNewPaddle(width, height);
-        drawNewBall(width, height);
+        drawNewPaddle(squareDim, squareDim);
+        drawNewBall();
         drawBlocks(currLevel);
         drawText("Breakout", FONT_SIZE_LRG, SIZE / 5.0);
         scene.setOnKeyPressed(e -> handleKeyInput(e.getCode())); // Handle input
         return scene;
     }
 
-    /**
-     * Initializes game variables at start of play
-     */
     private void initializeGameVars() {
         ballList = new ArrayList<>(); // Create new lists to keep track of objects
         blockList = new ArrayList<>();
@@ -113,10 +105,6 @@ public class Breakout extends Application {
         root.getChildren().add(livesText);
     }
 
-    /**
-     * Change properties of shapes to animate them
-     * @param elapsedTime Time elapsed since game start
-     */
     private void step (double elapsedTime) {
         maintainSceneDims();
         handleMouseControl();
@@ -124,18 +112,11 @@ public class Breakout extends Application {
         checkForCollisions();
     }
 
-    /**
-     * Maintains intended dimensions of scene/stage
-     */
     private void maintainSceneDims() {
-        if (myStage.getHeight() != SIZE) myStage.setHeight(SIZE);
-        if (myStage.getWidth() != SIZE) myStage.setWidth(SIZE);
+        myStage.setHeight(sceneDim);
+        myStage.setWidth(sceneDim);
     }
 
-    /**
-     * Updates attributes of ball
-     * @param elapsedTime Time elapsed since game start
-     */
     private void updateBallAttributes(double elapsedTime) {
         for (Ball b : ballList) {
             if (!b.isLaunched()) {
@@ -147,11 +128,6 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Adjusts ball position
-     * @param b Ball whose position will be adjusted
-     * @param elapsedTime Time elapsed since game start
-     */
     private void moveBall(Ball b, double elapsedTime) {
         b.setLastX(b.getX());
         b.setLastY(b.getY());
@@ -172,9 +148,6 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Checks for collisions between all game objects
-     */
     private void checkForCollisions() {
         boolean levelComplete = true;
 
@@ -199,11 +172,6 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Checks for collisions between Ball and Rectangle objects
-     * @param r Rectangle for collision check
-     * @param b Ball for collision check
-     */
     private void rectangleCollision(Rectangle r, Ball b) {
         if (b.getLastY() + b.getBoundsInParent().getHeight() < r.getY()) { //must be above brick
             b.reverseY();
@@ -217,11 +185,6 @@ public class Breakout extends Application {
         b.revert();
     }
 
-    /**
-     * Updates player's game variables and displays them in text
-     * @param t Text object for player variable
-     * @param add Amount to add or subtract from variable text references
-     */
     private void updatePlayerVar(Text t, int add) {
         double xpos = 0;
         t.setFont(Font.font("verdana", FontWeight.NORMAL, FontPosture.REGULAR, FONT_SIZE_SML));
@@ -240,10 +203,6 @@ public class Breakout extends Application {
         t.setY(SIZE - VERT_OFFSET);
     }
 
-    /**
-     * Resets ball and paddle to starting sttributes
-     * @param b Ball to reset
-     */
     private void resetBall(Ball b) {
         if (livesCount > 0 && activeBalls == 0 && currLevel != 0){
             updatePlayerVar(livesText, -1);
@@ -258,9 +217,6 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Removes game objects from the active Group
-     */
     private void flushObjects() {
         for (Ball b : ballList) {
             b.flushBall(root);
@@ -281,34 +237,20 @@ public class Breakout extends Application {
     }
 
 
-    /**
-     * Draws a new ball at specified location
-     * @param horiz Horizontal starting location
-     * @param vert Vertical starting location
-     */
-    private void drawNewBall(int horiz, int vert) {
-        Ball newBall = new Ball(horiz, vert);
+    private void drawNewBall() {
+        Ball newBall = new Ball();
         newBall.initialize(myPaddle);
         ballList.add(newBall);
         root.getChildren().add(newBall);
         activeBalls++;
     }
 
-    /**
-     * Draws new paddle at given location
-     * @param horiz Horizontal starting location
-     * @param vert Vertical starting location
-     */
     private void drawNewPaddle(int horiz, int vert) {
         myPaddle = new Paddle(horiz, vert);
         root.getChildren().add(myPaddle);
         myPaddle.initialize();
     }
 
-    /**
-     * Draws full grid for given level's block layout from text
-     * @param level Current level
-     */
     private void drawBlocks(int level) {
         Scanner scan = new Scanner(this.getClass().getClassLoader().getResourceAsStream(level + ".txt"));
         for (int j = 0; j < BLOCKS_PER_COL; j++) {
@@ -324,10 +266,6 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Draws static text with given properties
-     * @param message Text message to display
-     */
     private void drawText(String message, int size, double vpos) {
         Text drawnText = new Text();
         drawnText.setText(message);
@@ -349,17 +287,13 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Changes game to specified level
-     * @param level Destination level
-     */
     private void goToLevel(int level) {
         if (level <= 3) {
             currLevel = level;
 
             flushObjects();
 
-            drawNewBall(SIZE, SIZE);
+            drawNewBall();
             drawBlocks(currLevel);
             updatePlayerVar(scoreText, 0);
             updatePlayerVar(livesText, 0);
@@ -371,18 +305,11 @@ public class Breakout extends Application {
         }
     }
 
-    /**
-     * Handles mouse input, updates cursor position variables, binds paddle to cursor
-     */
     private void handleMouseControl() {
         Point currBallPos = MouseInfo.getPointerInfo().getLocation();
         myPaddle.setX(currBallPos.x - myStage.getX() - myPaddle.getBoundsInParent().getWidth() / 2);
     }
 
-    /**
-     * What to do each time a key is pressed
-     * @param code Keyboard code for input
-     */
     private void handleKeyInput (KeyCode code) {
         if (code == KeyCode.SPACE) {
             for (Ball b : ballList) {
