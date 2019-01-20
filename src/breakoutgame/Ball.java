@@ -33,23 +33,19 @@ public class Ball extends ImageView {
         myLaunchStatus = false;
     }
 
-    public void attachToPaddle(Paddle p) {
-        this.setX(p.getX() + p.getBoundsInParent().getWidth() / 2 - this.getBoundsInParent().getWidth() / 2);
-        this.setY(p.getY() - this.getBoundsInParent().getHeight() - 1);
-    }
-
     public void launch() {
         myLaunchStatus = true;
         myXSpeed = (int) ((Math.random() * mySpeedRange) + myMinSpeed) * randomDirection();
         myYSpeed = (int) (Math.random() * mySpeedRange) + myMinSpeed * -1;
     }
 
-    private int randomDirection() {
-        return (int) Math.signum((Math.random() * 2) - 1);
+    public void attachToPaddle(Paddle p) {
+        this.setX(p.getX() + p.getBoundsInParent().getWidth() / 2 - this.getBoundsInParent().getWidth() / 2);
+        this.setY(p.getY() - this.getBoundsInParent().getHeight() - 1);
     }
 
-    public void flushBall(Group root) {
-        root.getChildren().remove(this);
+    private int randomDirection() {
+        return (int) Math.signum((Math.random() * 2) - 1);
     }
 
     public void revert() {
@@ -57,20 +53,28 @@ public class Ball extends ImageView {
         this.setY(myLastY);
     }
 
-    public void setLastY(double y) {
-        myLastY = y;
+    public void flushBall(Group root) {
+        root.getChildren().remove(this);
     }
 
-    public double getLastY() {
-        return myLastY;
+    public void reverseX(){
+        myXDirection *= -1;
+    }
+
+    public void reverseY(){
+        myYDirection *= -1;
+    }
+
+    public void setLastY(double y) {
+        myLastY = y;
     }
 
     public void setLastX(double x) {
         myLastX = x;
     }
 
-    public double getLastX() {
-        return myLastX;
+    public double getLastY() {
+        return myLastY;
     }
 
     public int getXSpeed(){
@@ -91,13 +95,5 @@ public class Ball extends ImageView {
 
     public boolean isLaunched() {
         return myLaunchStatus;
-    }
-
-    public void reverseX(){
-        myXDirection *= -1;
-    }
-
-    public void reverseY(){
-        myYDirection *= -1;
     }
 }

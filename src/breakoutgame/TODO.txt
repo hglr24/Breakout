@@ -1,15 +1,16 @@
-Enemies
-Readmes
-shrink methods
-lock window props
-
 Power-ups:
 Multiball
 Sticky paddle
 Long paddle
-Another paddle power-up
+Short paddle
 
+Enemies:
+zigzag
+projectile
 
+shrink methods: checkforcollisions
+reorganize methods
+Readmes
 
 
 

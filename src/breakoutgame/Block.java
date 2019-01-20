@@ -51,11 +51,6 @@ public class Block extends Rectangle {
         this.setFill(myColor);
     }
 
-    private void remove(){
-        this.setX(offscreen);
-        this.removed = true;
-    }
-
     public void updateHealth() {
         if (myHealth != -1) {
             myHealth--;
@@ -64,15 +59,20 @@ public class Block extends Rectangle {
         }
     }
 
+    private void remove(){
+        this.setX(offscreen);
+        this.removed = true;
+    }
+
+    public void flushBlock(Group root) {
+        root.getChildren().remove(this);
+    }
+
     public int getHealth() {
         return myHealth;
     }
 
     public boolean isRemoved() {
         return removed;
-    }
-
-    public void flushBlock(Group root) {
-        root.getChildren().remove(this);
     }
 }

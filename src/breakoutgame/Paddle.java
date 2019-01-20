@@ -21,6 +21,9 @@ public class Paddle extends Rectangle {
 
     public void initialize() {
         this.setFill(myColor);
+        this.setWidth(PADDLE_ORIG_WIDTH);
+        this.setHeight(PADDLE_HEIGHT);
+        mySticky = false;
     }
 
     public void lengthen() {
@@ -36,7 +39,7 @@ public class Paddle extends Rectangle {
     }
 
     public void stickify() {
-        mySticky = !mySticky;
+        mySticky = true;
     }
 
     public boolean isSticky() {
