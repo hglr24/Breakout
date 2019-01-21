@@ -50,7 +50,8 @@ Cheat keys:
 
 Known Bugs:
 - If player has been hit by enemy, program will not stop when
- window is closed
+ window is closed due to an issue with the Timer object used
+ in Paddle.flash()
 
 Extra credit:  
 Added enemies to game to make it more interactive and lively:

@@ -15,7 +15,6 @@ import java.util.TimerTask;
  */
 public class Paddle extends Rectangle {
     private Paint myColor;
-    private Timer timer;
     private boolean mySticky;
     private static final int PADDLE_HEIGHT = 15;
     private static final int PADDLE_ORIG_WIDTH = 50;
@@ -59,19 +58,19 @@ public class Paddle extends Rectangle {
      * Makes paddle sticky (ball will now stick to it)
      */
     public void stickify() {
-        mySticky = true;
+        mySticky = !mySticky;
     }
 
     /**
      * "Kills" paddle when hit by enemy
      */
     public void kill() {
-        timer = new Timer();
         this.initialize();
         this.flash();
     }
 
-    private void flash() { //TODO: fix this timer
+    private void flash() {
+        Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             int count = 0;
             @Override
@@ -84,7 +83,7 @@ public class Paddle extends Rectangle {
                 }
             }
         }, 0, 100);
-        timer.cancel();
+        //timer.cancel(); //fixes timer issue but eliminates flashing effect on paddle
     }
 
     private void changeColor() {
