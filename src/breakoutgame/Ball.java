@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Class for ball objects in Breakout game
  * Depends on breakoutgame package, JavaFX library and java.util.concurrent.ThreadLocalRandom
+ * Ex. Ball b = new Ball()
+ * Ex. b.launch()
  * @author Harry Ross (hgr8)
  */
 public class Ball extends ImageView {
@@ -56,6 +58,16 @@ public class Ball extends ImageView {
         myLaunchStatus = true;
         myXSpeed = (int) (netSpeed * Math.cos(randAngle) * randomDirection());
         myYSpeed = (int) (netSpeed * Math.sin(randAngle) * -1);
+    }
+
+    /**
+     * Advances ball to next position
+     */
+    public void move(double elapsedTime) {
+        this.setLastX(this.getX());
+        this.setLastY(this.getY());
+        this.setX(this.getX() + this.getXSpeed() * this.getXDirection() * elapsedTime);
+        this.setY(this.getY() + this.getYSpeed() * this.getYDirection() * elapsedTime);
     }
 
     /**

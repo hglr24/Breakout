@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Main game class for Breakout, developed for CS308
  * Depends on breakoutgame package, JavaFX library, java.util.*, java.awt.*
+ * Use by running main()
  * @author Harry Ross (hgr8)
  */
 public class Breakout extends Application {
@@ -80,6 +81,7 @@ public class Breakout extends Application {
 
         KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
         Timeline animation = new Timeline();
+
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
         animation.play();
@@ -97,6 +99,16 @@ public class Breakout extends Application {
         drawText("Breakout", FONT_SIZE_LRG, SIZE / 5.0);
         scene.setOnKeyPressed(e -> handleKeyInput(e.getCode())); // Handle input
         return scene;
+    }
+
+    private void step(double elapsedTime) {
+        maintainSceneDims();
+        handleMouseControl();
+        updateBallAttributes(elapsedTime);
+        updateEnemyAttributes(elapsedTime);
+        updatePowerups(elapsedTime);
+        checkForBallCollisions();
+        checkForProjCollisions();
     }
 
     private void initializeGameVars() {
@@ -122,16 +134,6 @@ public class Breakout extends Application {
         enemyList = new ArrayList<>();
     }
 
-    private void step (double elapsedTime) {
-        maintainSceneDims();
-        handleMouseControl();
-        updateBallAttributes(elapsedTime);
-        updateEnemyAttributes(elapsedTime);
-        updatePowerups(elapsedTime);
-        checkForBallCollisions();
-        checkForProjCollisions();
-    }
-
     private void maintainSceneDims() {
         myStage.setHeight(sceneDim);
         myStage.setWidth(sceneDim);
@@ -143,7 +145,8 @@ public class Breakout extends Application {
                 if (!b.isLaunched()) {
                     b.attachToPaddle(myPaddle);
                 } else {
-                    moveBall(b, elapsedTime);
+                    b.move(elapsedTime);
+                    checkBallBoundaries(b);
                 }
             }
         }
@@ -165,14 +168,6 @@ public class Breakout extends Application {
         for (Powerup p : powerupList) {
             p.move(elapsedTime);
         }
-    }
-
-    private void moveBall(Ball b, double elapsedTime) {
-        b.setLastX(b.getX());
-        b.setLastY(b.getY());
-        b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
-        b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
-        checkBallBoundaries(b);
     }
 
     private void checkBallBoundaries(Ball b) {
@@ -213,18 +208,6 @@ public class Breakout extends Application {
         }
     }
 
-    private void ballBlockCollision(Ball b, Block blo) {
-        if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
-            rectangleBallCollision(blo, b);
-            if (blo.getHealth() != -1 && currLevel != 0) {
-                powerupChance(blo);
-                enemyChance();
-                updatePlayerVar(scoreText, BLOCK_VALUE);
-            }
-            blo.updateHealth();
-        }
-    }
-
     private void checkForProjCollisions() {
         for (Powerup p : powerupList) {
             if (myPaddle.getBoundsInParent().intersects(p.getBoundsInParent())) {
@@ -235,6 +218,18 @@ public class Breakout extends Application {
             if (myPaddle.getBoundsInParent().intersects(e.getBoundsInParent())) {
                 paddleProjectileCollision(e);
             }
+        }
+    }
+
+    private void ballBlockCollision(Ball b, Block blo) {
+        if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
+            rectangleBallCollision(blo, b);
+            if (blo.getHealth() != -1 && currLevel != 0) {
+                powerupChance(blo);
+                enemyChance();
+                updatePlayerVar(scoreText, BLOCK_VALUE);
+            }
+            blo.updateHealth();
         }
     }
 
@@ -309,8 +304,7 @@ public class Breakout extends Application {
 
     private void updatePlayerVar(Text t, int add) {
         double xpos = 0;
-        t.setFont(Font.font("verdana", FontWeight.NORMAL, FontPosture.REGULAR, FONT_SIZE_SML));
-        t.setFill(Color.LIGHTBLUE);
+        varTextFirstDisplay(t);
         if (t.equals(livesText)) {
             livesCount += add;
             t.setText("Lives: " + (livesCount + 1));
@@ -326,7 +320,6 @@ public class Breakout extends Application {
             xpos = SIZE / 2.0 - t.getBoundsInParent().getWidth() / 2.0;
         }
         t.setX(xpos);
-        t.setY(SIZE - VERT_OFFSET);
     }
 
     private void resetBall(Ball b) {
@@ -339,12 +332,6 @@ public class Breakout extends Application {
             updatePlayerVar(livesText, -1);
             gameOver();
         }
-    }
-
-    private void gameOver() {
-        flushObjects();
-        drawText("Game Over", FONT_SIZE_LRG, SIZE / 2.0);
-        gameOver = true;
     }
 
     private void flushObjects() {
@@ -413,13 +400,18 @@ public class Breakout extends Application {
         drawnText.setY(vpos);
         textList.add(drawnText);
         root.getChildren().add(drawnText);
-
         if (message.equals("Breakout")) {
             drawText("1 Hit     2 Hits       Unbreakable\n\n  " +
-                            "Control paddle with mouse!\n" +
-                            "   Press Space to launch ball!\n\n         Press Enter to play!",
+                            "Control paddle with mouse!\n" + "            Avoid enemies!\n" +
+                            "   Press Space to launch ball!\n         Press Enter to play!",
                     FONT_SIZE_SML, SIZE * INSTRUCTION_TXT_POS);
         }
+    }
+
+    private void varTextFirstDisplay(Text t) {
+        t.setFont(Font.font("verdana", FontWeight.NORMAL, FontPosture.REGULAR, FONT_SIZE_SML));
+        t.setFill(Color.LIGHTBLUE);
+        t.setY(SIZE - VERT_OFFSET);
     }
 
     private void goToLevel(int level) {
@@ -438,6 +430,12 @@ public class Breakout extends Application {
             levelText.setVisible(false);
             drawText("You Win!", FONT_SIZE_LRG, SIZE / 2.0);
         }
+    }
+
+    private void gameOver() {
+        flushObjects();
+        drawText("Game Over", FONT_SIZE_LRG, SIZE / 2.0);
+        gameOver = true;
     }
 
     private void handleMouseControl() {

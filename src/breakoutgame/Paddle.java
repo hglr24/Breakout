@@ -9,6 +9,8 @@ import java.util.TimerTask;
 /**
  * Class for paddle objects in Breakout game
  * Depends on breakoutgame package, JavaFX library
+ * Ex. Paddle p = new Paddle(int horizontal, int vertical)
+ * Ex. p.lengthen()
  * @author Harry Ross (hgr8)
  */
 public class Paddle extends Rectangle {
@@ -69,7 +71,7 @@ public class Paddle extends Rectangle {
         this.flash();
     }
 
-    private void flash() { //TODO: fix this shit
+    private void flash() { //TODO: fix this timer
         timer.scheduleAtFixedRate(new TimerTask() {
             int count = 0;
             @Override
@@ -83,7 +85,6 @@ public class Paddle extends Rectangle {
             }
         }, 0, 100);
         timer.cancel();
-        timer.purge();
     }
 
     private void changeColor() {

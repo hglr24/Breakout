@@ -8,6 +8,8 @@ import javafx.scene.shape.Rectangle;
 /**
  * Class for block objects in Breakout game
  * Depends on breakoutgame package, JavaFX library
+ * Ex. Block b = new Block(int type, int hpos, int vpos, int r, int c)
+ * Ex. b.initialize()
  * @author Harry Ross (hgr8)
  */
 public class Block extends Rectangle {

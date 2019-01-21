@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Class for power-up objects in Breakout game
  * Depends on breakoutgame package, JavaFX library and Java.util.concurrent.ThreadLocalRandom
+ * Ex. Powerup p = new Powerup(double xpos, double ypos)
+ * Ex. p.getType()
  * @author Harry Ross (hgr8)
  */
 public class Powerup extends ImageView {
@@ -17,7 +19,7 @@ public class Powerup extends ImageView {
     private static final int PUP_SPEED = 70;
 
     /**
-     * Creates power-up object and initializes
+     * Creates power-up object and initializes with given starting coordinates
      */
     public Powerup(double xpos, double ypos) {
         super();

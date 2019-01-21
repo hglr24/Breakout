@@ -8,6 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Class for enemy objects in Breakout game
  * Depends on breakoutgame package and JavaFX library
+ * Ex. Enemy e = new Enemy(int type)
+ * Ex. Enemy e = new Enemy(Enemy e) -> for projectiles
+ * Ex. e.reverseX()
  * @author Harry Ross (hgr8)
  */
 public class Enemy extends ImageView {

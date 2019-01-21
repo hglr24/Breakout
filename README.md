@@ -32,9 +32,9 @@ Data files needed:
 - pup1.gif
 - pup2.gif
 - pup3.gif
+- en0.gif
 - en1.gif
 - en2.gif
-- enproj.gif
 
 Key/Mouse inputs:
 - Use mouse cursor to move paddle
@@ -49,12 +49,13 @@ Cheat keys:
 - B - Add one ball to play
 
 Known Bugs:
-- Occasionally program will not stop when window is closed
+- If player has been hit by enemy, program will not stop when
+ window is closed
 
 Extra credit:  
 Added enemies to game to make it more interactive and lively:
 - One enemy zig-zags across screen
-- One enemy occasionally shoots projectiles
+- One enemy zig-zags and occasionally shoots downward projectiles
 
 
 ### Notes
