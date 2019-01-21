@@ -1,20 +1,7 @@
-Enemies:
-Zigzag
-Projectile
-
-Shrink methods: checkForCollisions()
-Reorder methods
-Readme
-
+Shrink methods
 
 Each file should include:
-    comment each class to describe its
-        purpose (why would anyone use it)
-        dependencies (what other classes or packages it depends on)
-        an example of how to use it
-
-
-
+    comment each class with an example of how to use it
 
 
 

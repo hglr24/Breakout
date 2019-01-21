@@ -172,6 +172,10 @@ public class Breakout extends Application {
         b.setLastY(b.getY());
         b.setX(b.getX() + b.getXSpeed() * b.getXDirection() * elapsedTime);
         b.setY(b.getY() + b.getYSpeed() * b.getYDirection() * elapsedTime);
+        checkBallBoundaries(b);
+    }
+
+    private void checkBallBoundaries(Ball b) {
         if (b.getX() + b.getBoundsInParent().getWidth() >= SIZE || b.getX() <= 0) {
             b.reverseX();
         }
@@ -197,15 +201,7 @@ public class Breakout extends Application {
                 rectangleBallCollision(myPaddle, b);
             }
             for (Block blo : blockList) {
-                if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
-                    rectangleBallCollision(blo, b);
-                    if (blo.getHealth() != -1 && currLevel != 0) {
-                        powerupChance(blo);
-                        enemyChance();
-                        updatePlayerVar(scoreText, BLOCK_VALUE);
-                    }
-                    blo.updateHealth();
-                }
+                ballBlockCollision(b, blo);
                 if (blo.getHealth() > 0 && !blo.isRemoved()) {
                     levelComplete = false;
                 }
@@ -214,6 +210,18 @@ public class Breakout extends Application {
                 updatePlayerVar(scoreText, LVL_COMP_VALUE);
                 goToLevel(currLevel + 1);
             }
+        }
+    }
+
+    private void ballBlockCollision(Ball b, Block blo) {
+        if (blo.getBoundsInParent().intersects(b.getBoundsInParent())) {
+            rectangleBallCollision(blo, b);
+            if (blo.getHealth() != -1 && currLevel != 0) {
+                powerupChance(blo);
+                enemyChance();
+                updatePlayerVar(scoreText, BLOCK_VALUE);
+            }
+            blo.updateHealth();
         }
     }
 
@@ -251,6 +259,16 @@ public class Breakout extends Application {
     }
 
     private void paddleProjectileCollision(ImageView i) {
+        executePowerup(i);
+        if (i instanceof Enemy && !((Enemy) i).isRemoved()) {
+            ((Enemy) i).remove();
+            myPaddle.kill();
+            updatePlayerVar(livesText, -1);
+            if (livesCount == -1) gameOver();
+        }
+    }
+
+    private void executePowerup(ImageView i) {
         if (i instanceof Powerup) {
             switch (((Powerup) i).getType()) {
                 case 0:
@@ -269,12 +287,6 @@ public class Breakout extends Application {
             }
             ((Powerup) i).remove();
             ((Powerup) i).flushPowerup(root);
-        }
-        if (i instanceof Enemy && !((Enemy) i).isRemoved()) {
-            ((Enemy) i).remove();
-            myPaddle.kill();
-            updatePlayerVar(livesText, -1);
-            if (livesCount == -1) gameOver();
         }
     }
 

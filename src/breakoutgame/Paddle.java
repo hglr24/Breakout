@@ -6,17 +6,15 @@ import javafx.scene.paint.Paint;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 /**
  * Class for paddle objects in Breakout game
  * Depends on breakoutgame package, JavaFX library
  * @author Harry Ross (hgr8)
  */
 public class Paddle extends Rectangle {
-    private int myWidth;
     private Paint myColor;
-    private boolean mySticky;
     private Timer timer;
+    private boolean mySticky;
     private static final int PADDLE_HEIGHT = 15;
     private static final int PADDLE_ORIG_WIDTH = 50;
     private static final double PADDLE_VERT_POS = 8.8/10;
@@ -29,7 +27,6 @@ public class Paddle extends Rectangle {
     public Paddle(int horizontal, int vertical) {
         super(horizontal / 2.0 - PADDLE_ORIG_WIDTH / 2.0, vertical * PADDLE_VERT_POS, PADDLE_ORIG_WIDTH, PADDLE_HEIGHT);
         myColor = Color.LIGHTBLUE;
-        myWidth = PADDLE_ORIG_WIDTH;
     }
 
     /**
@@ -67,38 +64,26 @@ public class Paddle extends Rectangle {
      * "Kills" paddle when hit by enemy
      */
     public void kill() {
-        this.initialize();
         timer = new Timer();
+        this.initialize();
         this.flash();
-        timer.cancel();
     }
 
     private void flash() { //TODO: fix this shit
-
-        timer.schedule(new TimerTask() {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            int count = 0;
             @Override
             public void run() {
                 changeColor();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        changeColor();
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                changeColor();
-                                timer.schedule(new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        changeColor();
-                                    }
-                                }, 100);
-                            }
-                        }, 100);
-                    }
-                }, 100);
+                count++;
+                if (count == 6) {
+                    this.cancel();
+                    timer.purge();
+                }
             }
-        }, 100);
+        }, 0, 100);
+        timer.cancel();
+        timer.purge();
     }
 
     private void changeColor() {
