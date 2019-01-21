@@ -34,6 +34,7 @@ Data files needed:
 - pup3.gif
 - en1.gif
 - en2.gif
+- enproj.gif
 
 Key/Mouse inputs:
 - Use mouse cursor to move paddle
@@ -48,7 +49,7 @@ Cheat keys:
 - B - Add one ball to play
 
 Known Bugs:
-- None
+- Occasionally program will not stop when window is closed
 
 Extra credit:  
 Added enemies to game to make it more interactive and lively:

@@ -41,8 +41,10 @@ public class Breakout extends Application {
     private static final int FONT_SIZE_LRG = 70;
     private static final int FONT_SIZE_SML = 30;
     private static final double DEFAULT_STROKE = 1.9;
-    private static final int STARTING_LIVES = 2;
+    private static final int STARTING_LIVES = 4;
     private static final int PUP_CHANCE = 6;
+    private static final int ENEMY_CHANCE = 5;
+    private static final int PROJ_CHANCE = 200;
     private static final int BLOCK_VALUE = 200;
     private static final int LVL_COMP_VALUE = 10000;
 
@@ -69,7 +71,7 @@ public class Breakout extends Application {
      * @param stage Game stage
      */
     @Override
-    public void start (Stage stage) {
+    public void start(Stage stage) {
         myStage = stage;
         Scene myScene = setupGame(SIZE);
         stage.setScene(myScene);
@@ -83,7 +85,7 @@ public class Breakout extends Application {
         animation.play();
     }
 
-    private Scene setupGame (int squareDim) {
+    private Scene setupGame(int squareDim) {
         root = new Group();
         Scene scene = new Scene(root, squareDim, squareDim, BACKGROUND_COLOR);
         sceneDim = scene.getWidth() + SCENE_DIM_OFFSET;
@@ -98,11 +100,7 @@ public class Breakout extends Application {
     }
 
     private void initializeGameVars() {
-        ballList = new ArrayList<>(); // Create new lists to keep track of objects
-        blockList = new ArrayList<>();
-        powerupList = new ArrayList<>();
-        textList = new ArrayList<>();
-        enemyList = new ArrayList<>();
+        refreshLists();
 
         currLevel = 0;
         livesCount = STARTING_LIVES;
@@ -116,10 +114,19 @@ public class Breakout extends Application {
         root.getChildren().add(levelText);
     }
 
+    private void refreshLists() {
+        ballList = new ArrayList<>();
+        blockList = new ArrayList<>();
+        powerupList = new ArrayList<>();
+        textList = new ArrayList<>();
+        enemyList = new ArrayList<>();
+    }
+
     private void step (double elapsedTime) {
         maintainSceneDims();
         handleMouseControl();
         updateBallAttributes(elapsedTime);
+        updateEnemyAttributes(elapsedTime);
         updatePowerups(elapsedTime);
         checkForBallCollisions();
         checkForProjCollisions();
@@ -139,6 +146,18 @@ public class Breakout extends Application {
                     moveBall(b, elapsedTime);
                 }
             }
+        }
+    }
+
+    private void updateEnemyAttributes(double elapsedTime) {
+        int projShoot = ThreadLocalRandom.current().nextInt(0, PROJ_CHANCE);
+        if (projShoot == 0 && enemyList.size() > 1 && enemyList.get(enemyList.size() - 1).getType() != 0) {
+            Enemy en = new Enemy(enemyList.get(enemyList.size() - 1));
+            enemyList.add(en);
+            root.getChildren().add(en);
+        }
+        for (Enemy e : enemyList) {
+            e.move(elapsedTime, root);
         }
     }
 
@@ -182,6 +201,7 @@ public class Breakout extends Application {
                     rectangleBallCollision(blo, b);
                     if (blo.getHealth() != -1 && currLevel != 0) {
                         powerupChance(blo);
+                        enemyChance();
                         updatePlayerVar(scoreText, BLOCK_VALUE);
                     }
                     blo.updateHealth();
@@ -206,10 +226,8 @@ public class Breakout extends Application {
         for (Enemy e : enemyList) {
             if (myPaddle.getBoundsInParent().intersects(e.getBoundsInParent())) {
                 paddleProjectileCollision(e);
-                myPaddle.kill(e);
             }
         }
-        //TODO: enemy projectile cycle
     }
 
     private void rectangleBallCollision(Rectangle r, Ball b) {
@@ -252,9 +270,11 @@ public class Breakout extends Application {
             ((Powerup) i).remove();
             ((Powerup) i).flushPowerup(root);
         }
-        if (i instanceof Enemy) {
-            //TODO KILL PADDLE (Pause paddle and enemy, balls; revert paddle, balls, powerups)
+        if (i instanceof Enemy && !((Enemy) i).isRemoved()) {
+            ((Enemy) i).remove();
+            myPaddle.kill();
             updatePlayerVar(livesText, -1);
+            if (livesCount == -1) gameOver();
         }
     }
 
@@ -263,6 +283,15 @@ public class Breakout extends Application {
         if (rand == 0) {
             drawNewPowerup(b.getX() + b.getBoundsInParent().getWidth() / 2.0,
                     b.getY() + b.getBoundsInParent().getHeight() / 2.0);
+        }
+    }
+
+    private void enemyChance() {
+        int rand = ThreadLocalRandom.current().nextInt(0, ENEMY_CHANCE);
+        if (rand == 0) {
+            Enemy e = new Enemy(ThreadLocalRandom.current().nextInt(0, 2));
+            enemyList.add(e);
+            root.getChildren().add(e);
         }
     }
 
@@ -296,10 +325,14 @@ public class Breakout extends Application {
         }
         else if (livesCount == 0 && textList.size() == 0){
             updatePlayerVar(livesText, -1);
-            flushObjects();
-            drawText("Game Over", FONT_SIZE_LRG, SIZE / 2.0);
-            gameOver = true;
+            gameOver();
         }
+    }
+
+    private void gameOver() {
+        flushObjects();
+        drawText("Game Over", FONT_SIZE_LRG, SIZE / 2.0);
+        gameOver = true;
     }
 
     private void flushObjects() {
@@ -319,11 +352,7 @@ public class Breakout extends Application {
             root.getChildren().remove(t);
         }
         activeBalls = 0;
-        blockList = new ArrayList<>();
-        ballList = new ArrayList<>();
-        powerupList = new ArrayList<>();
-        enemyList = new ArrayList<>();
-        textList = new ArrayList<>();
+        refreshLists();
     }
 
     private void drawNewBall() {
@@ -370,9 +399,7 @@ public class Breakout extends Application {
         drawnText.setStrokeWidth(DEFAULT_STROKE);
         drawnText.setX(SIZE / 2.0 - drawnText.getBoundsInParent().getWidth() / 2);
         drawnText.setY(vpos);
-
         textList.add(drawnText);
-
         root.getChildren().add(drawnText);
 
         if (message.equals("Breakout")) {
@@ -386,9 +413,7 @@ public class Breakout extends Application {
     private void goToLevel(int level) {
         if (level <= 3) {
             currLevel = level;
-
             flushObjects();
-
             drawNewBall();
             myPaddle.initialize();
             drawBlocks(currLevel);
@@ -396,7 +421,6 @@ public class Breakout extends Application {
             updatePlayerVar(livesText, 0);
             updatePlayerVar(levelText, 0);
         }
-
         else {
             flushObjects();
             levelText.setVisible(false);
@@ -412,7 +436,7 @@ public class Breakout extends Application {
         }
     }
 
-    private void handleKeyInput (KeyCode code) {
+    private void handleKeyInput(KeyCode code) {
         if (code == KeyCode.SPACE) {
             for (Ball b : ballList) {
                 if (!b.isLaunched()) b.launch();

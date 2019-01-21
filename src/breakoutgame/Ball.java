@@ -49,8 +49,8 @@ public class Ball extends ImageView {
     public void launch() {
         int mySpeedRange = 60;
         int myMinSpeed = 200;
-        int minAngle = 45;
-        int maxAngle = 75;
+        int minAngle = 15;
+        int maxAngle = 40;
         double netSpeed = ThreadLocalRandom.current().nextInt(myMinSpeed, myMinSpeed + mySpeedRange);
         double randAngle = 2 * Math.PI / 180 * ThreadLocalRandom.current().nextInt(minAngle, maxAngle);
         myLaunchStatus = true;

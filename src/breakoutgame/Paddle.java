@@ -3,6 +3,9 @@ package breakoutgame;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Paint;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 /**
  * Class for paddle objects in Breakout game
@@ -13,6 +16,7 @@ public class Paddle extends Rectangle {
     private int myWidth;
     private Paint myColor;
     private boolean mySticky;
+    private Timer timer;
     private static final int PADDLE_HEIGHT = 15;
     private static final int PADDLE_ORIG_WIDTH = 50;
     private static final double PADDLE_VERT_POS = 8.8/10;
@@ -61,10 +65,45 @@ public class Paddle extends Rectangle {
 
     /**
      * "Kills" paddle when hit by enemy
-     * @param e Enemy that collided with paddle
      */
-    public void kill(Enemy e) {
+    public void kill() {
         this.initialize();
+        timer = new Timer();
+        this.flash();
+        timer.cancel();
+    }
+
+    private void flash() { //TODO: fix this shit
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                changeColor();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        changeColor();
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                changeColor();
+                                timer.schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        changeColor();
+                                    }
+                                }, 100);
+                            }
+                        }, 100);
+                    }
+                }, 100);
+            }
+        }, 100);
+    }
+
+    private void changeColor() {
+        if (this.getFill().equals(Color.LIGHTBLUE)) setFill(Color.SALMON);
+        else if (this.getFill().equals(Color.SALMON)) setFill(Color.LIGHTBLUE);
     }
 
     /**
